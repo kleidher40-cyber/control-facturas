@@ -109,67 +109,55 @@
 
   <div id="mensajeEstado" class="status"></div>
 </div>
-
 <script>
   // DOCUMENTACIÓN:
-  // URL generada por Google Apps Script para conectar la web con tu Google Sheet.
-  const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzySX4RJzev0EUz89yHSH10hFMfzx0ieSof17HNm9Fj1899yu3CJN0PLjVr6G1KfCsZ-Q/exec";
+  // URL de tu App web en Google Apps Script (Versión 5)
+  const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzySX4RJzev0Uz89yHSH10hFMfzx0ieSof17HNm9Fj1899yu3CJN0PLjVr6G1KfCsZ-Q/exec";
 
-  // Captura del evento de envío del formulario
+  // DOCUMENTACIÓN:
+  // Escuchador del evento submit del formulario
   document.getElementById("facturaForm").addEventListener("submit", function(e) {
     e.preventDefault();
     
     const estado = document.getElementById("mensajeEstado");
     const btn = document.getElementById("btnGuardar");
     
+    // Deshabilitar botón durante el proceso de envío
     btn.disabled = true;
     estado.style.color = "#0d6efd";
-    estado.textContent = "Guardando registro...";
+    estado.textContent = "Enviando datos a Google Sheets...";
 
-    // Recopilación de datos desde los campos del formulario
     const base = parseFloat(document.getElementById("baseImponible").value) || 0;
-    const alicuota = 0.16;
-    const montoIVA = base * alicuota;
-    const montoTotal = base + montoIVA;
-    const retencionPct = 0.75;
-    const montoRetenido = montoIVA * retencionPct;
 
+    // Estructura de datos JSON enviada
     const datosFactura = {
       tipoOperacion: document.getElementById("tipoOperacion").value,
       fechaFactura: document.getElementById("fechaFactura").value,
-      numFactura: document.getElementById("numFactura").value,
-      numControl: document.getElementById("numControl").value,
-      rif: document.getElementById("rif").value,
-      montoExento: 0,
-      baseImponible: base,
-      alicuotaIVA: "16%",
-      montoIVA: montoIVA,
-      montoTotal: montoTotal,
-      porcentajeRetencion: "75%",
-      montoRetenido: montoRetenido
+      numeroFactura: document.getElementById("numFactura").value,
+      numeroControl: document.getElementById("numControl").value,
+      rifTercero: document.getElementById("rif").value,
+      baseImponible: base
     };
 
-    // Envío de datos mediante petición HTTP POST a Apps Script
+    // DOCUMENTACIÓN:
+    // Petición HTTP POST enviada como texto plano para evitar bloqueos CORS en móviles
     fetch(URL_SCRIPT, {
       method: "POST",
       mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "text/plain" },
       body: JSON.stringify(datosFactura)
     })
     .then(() => {
       estado.style.color = "green";
-      estado.textContent = "¡Factura guardada con éxito!";
+      estado.textContent = "¡Factura enviada con éxito!";
       document.getElementById("facturaForm").reset();
       btn.disabled = false;
     })
     .catch(err => {
-      console.error("Error:", err);
+      console.error("Error de envío:", err);
       estado.style.color = "red";
-      estado.textContent = "Error al guardar. Intenta nuevamente.";
+      estado.textContent = "Error de conexión. Intenta nuevamente.";
       btn.disabled = false;
     });
   });
 </script>
-
-</body>
-</html>
