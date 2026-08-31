@@ -1,16 +1,13 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <!-- DOCUMENTACIÓN: viewport asegura que la página se adapte al tamaño de pantalla del teléfono -->
+  <!-- DOCUMENTACIÓN: Configuración del viewport para optimizar el diseño en teléfonos móviles -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Control de Facturas</title>
-  
-  <!-- DOCUMENTACIÓN: Carga de la librería Tesseract.js para escaneo OCR desde imágenes -->
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 
   <style>
-    /* ESTILOS BASE PARA DISPOSITIVOS MÓVILES */
+    /* ESTILOS BASE LIGEROS PARA DISPOSITIVOS MÓVILES Y EQUIPOS DE BAJOS RECURSOS */
     body {
       font-family: Arial, sans-serif;
       background-color: #f4f6f9;
@@ -109,26 +106,28 @@
 
   <div id="mensajeEstado" class="status"></div>
 </div>
+
 <script>
   // DOCUMENTACIÓN:
-  // URL de tu App web en Google Apps Script (Versión 5)
-  const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwzigorPCA9ogF5FiHTTN75VmCdv3eKHrHcnlmOAa2YImril5W5ZZOYke6paDOnjue4sg/exec";
+  // URL actualizada de la App Web en Google Apps Script
+  const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbydxurH_LTPuh7rDxKG30MA9CDVL3O6TQtCCdW9CasQHu5Z6ClHBIBHfmGTcuZRYb0jHQ/exec";
+
   // DOCUMENTACIÓN:
-  // Escuchador del evento submit del formulario
+  // Escuchador que captura el evento de envío del formulario
   document.getElementById("facturaForm").addEventListener("submit", function(e) {
     e.preventDefault();
     
     const estado = document.getElementById("mensajeEstado");
     const btn = document.getElementById("btnGuardar");
     
-    // Deshabilitar botón durante el proceso de envío
+    // Bloquear el botón temporalmente para evitar múltiples envíos accidentales
     btn.disabled = true;
     estado.style.color = "#0d6efd";
     estado.textContent = "Enviando datos a Google Sheets...";
 
     const base = parseFloat(document.getElementById("baseImponible").value) || 0;
 
-    // Estructura de datos JSON enviada
+    // Objeto con la estructura de datos lista para enviar
     const datosFactura = {
       tipoOperacion: document.getElementById("tipoOperacion").value,
       fechaFactura: document.getElementById("fechaFactura").value,
@@ -139,7 +138,7 @@
     };
 
     // DOCUMENTACIÓN:
-    // Petición HTTP POST enviada como texto plano para evitar bloqueos CORS en móviles
+    // Petición HTTP POST enviada como texto plano para compatibilidad con móviles
     fetch(URL_SCRIPT, {
       method: "POST",
       mode: "no-cors",
@@ -160,3 +159,6 @@
     });
   });
 </script>
+
+</body>
+</html>
