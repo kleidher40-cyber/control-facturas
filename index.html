@@ -1,24 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Facturas</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 15px;
+      color: #333;
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #0d6efd;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+    button {
+      background-color: #0d6efd;
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #0b5ed7;
+    }
+    .status {
+      margin-top: 15px;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Registro de Factura</h2>
+
+  <form id="facturaForm">
+    <div class="form-group">
+      <label for="tipoOperacion">Tipo de Operación</label>
+      <select id="tipoOperacion" required>
+        <option value="Compras">Compra</option>
+        <option value="Ventas">Venta</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="fechaFactura">Fecha de Factura</label>
+      <input type="date" id="fechaFactura" required>
+    </div>
+
+    <div class="form-group">
+      <label for="numFactura">Número de Factura</label>
+      <input type="text" id="numFactura" placeholder="Ej: 000105" required>
+    </div>
+
+    <div class="form-group">
+      <label for="numControl">Número de Control</label>
+      <input type="text" id="numControl" placeholder="Ej: 00-00045">
+    </div>
+
+    <div class="form-group">
+      <label for="rif">RIF Tercero</label>
+      <input type="text" id="rif" placeholder="Ej: J-501234567" required>
+    </div>
+
+    <div class="form-group">
+      <label for="baseImponible">Base Imponible (BS)</label>
+      <input type="number" step="0.01" id="baseImponible" placeholder="0.00" required>
+    </div>
+
+    <button type="submit" id="btnGuardar">Guardar en Google Sheets</button>
+  </form>
+
+  <div id="mensajeEstado" class="status"></div>
+</div>
+
 <script>
   // DOCUMENTACIÓN:
-  // URL actualizada correspondiente a la Versión 8 de Google Apps Script
+  // URL funcional de tu Web App desplegada en Google Apps Script (Versión 8)
   const URL_SCRIPT = "https://script.google.com/macros/s/AKfycby4soLziaVKlfIOqBgSritHJWzReYzf6AhpijUP_b8Hz1ZHOlwhbZ-OE1lNwgeLJVYLkA/exec";
 
-  // DOCUMENTACIÓN:
-  // Escuchador del formulario que captura el clic en el botón de envío
   document.getElementById("facturaForm").addEventListener("submit", function(e) {
     e.preventDefault();
     
     const estado = document.getElementById("mensajeEstado");
     const btn = document.getElementById("btnGuardar");
     
-    // Deshabilitar botón durante el envío para evitar duplicados
     btn.disabled = true;
     estado.style.color = "#0d6efd";
     estado.textContent = "Enviando datos a Google Sheets...";
 
     const base = parseFloat(document.getElementById("baseImponible").value) || 0;
 
-    // Objeto estructurado con los datos de la factura
     const datosFactura = {
       tipoOperacion: document.getElementById("tipoOperacion").value,
       fechaFactura: document.getElementById("fechaFactura").value,
@@ -28,8 +131,6 @@
       baseImponible: base
     };
 
-    // DOCUMENTACIÓN:
-    // Petición HTTP POST enviada como texto plano para evitar bloqueos CORS
     fetch(URL_SCRIPT, {
       method: "POST",
       mode: "no-cors",
@@ -50,3 +151,6 @@
     });
   });
 </script>
+
+</body>
+</html>
