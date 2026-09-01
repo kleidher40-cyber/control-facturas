@@ -2,10 +2,12 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <!-- DOCUMENTACIÓN: Viewport estándar para renderizado correcto en móviles y escritorio -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Control de Facturas</title>
 
   <style>
+    /* ESTILOS INTERNOS: Sin archivos CSS externos para evitar fallos de carga */
     body {
       font-family: Arial, sans-serif;
       background-color: #f4f6f9;
@@ -107,9 +109,10 @@
 
 <script>
   // DOCUMENTACIÓN:
-  // URL funcional de tu Web App desplegada en Google Apps Script (Versión 8)
+  // URL de la App Web activa desplegada en Google Apps Script (Versión 8)
   const URL_SCRIPT = "https://script.google.com/macros/s/AKfycby4soLziaVKlfIOqBgSritHJWzReYzf6AhpijUP_b8Hz1ZHOlwhbZ-OE1lNwgeLJVYLkA/exec";
 
+  // Captura y envío del formulario mediante Javascript
   document.getElementById("facturaForm").addEventListener("submit", function(e) {
     e.preventDefault();
     
