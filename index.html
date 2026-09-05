@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control de Facturas</title>
+  <title>Control de Facturas con Foto</title>
   <style>
     body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 15px; color: #333; }
     .container { max-width: 500px; margin: 0 auto; background: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
@@ -11,6 +11,18 @@
     .form-group { margin-bottom: 15px; }
     label { display: block; font-weight: bold; margin-bottom: 5px; }
     input, select, button { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+    
+    .drop-zone {
+      border: 2px dashed #0d6efd;
+      border-radius: 6px;
+      padding: 20px;
+      text-align: center;
+      background-color: #eef5ff;
+      cursor: pointer;
+      color: #0d6efd;
+      font-weight: bold;
+    }
+    
     button { background-color: #0d6efd; color: white; font-weight: bold; border: none; cursor: pointer; margin-top: 10px; }
     button:hover { background-color: #0b5ed7; }
     .status { margin-top: 15px; text-align: center; font-weight: bold; }
@@ -69,6 +81,14 @@
       </select>
     </div>
 
+    <div class="form-group">
+      <label>Foto de la Factura</label>
+      <div class="drop-zone" onclick="document.getElementById('fotoInput').click()">
+        <span id="labelFoto">📷 Toca aquí para tomar foto o elegir imagen</span>
+        <input type="file" id="fotoInput" accept="image/*" style="display:none">
+      </div>
+    </div>
+
     <button type="submit" id="btnGuardar">Guardar en Google Sheets</button>
   </form>
 
@@ -76,8 +96,45 @@
 </div>
 
 <script>
-  // DOCUMENTACIÓN: URL de la aplicación web activa en Google Apps Script
-  const URL_BASE = "https://script.google.com/macros/s/AKfycby4soLziaVKlfIOqBgSritHJWzReYzf6AhpijUP_b8Hz1ZHOlwhbZ-OE1lNwgeLJVYLkA/exec";
+  const URL_BASE = "https://script.google.com/macros/s/AKfycby3fYNjVpbSVGkFW0Tmoz-YVL13r0DD_6a3N0dLRz_chcLZQ5oxPkpnKBiecIkEy8x_Bw/exec";
+  
+  let archivoBase64 = "", nombreArchivo = "", tipoArchivo = "image/jpeg";
+
+  // DOCUMENTACIÓN: Redimensión y compresión de imágenes mediante HTML5 Canvas
+  document.getElementById("fotoInput").addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      nombreArchivo = "factura_" + new Date().getTime() + ".jpg";
+      const reader = new FileReader();
+      
+      reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+          // Crear un canvas para redimensionar la imagen
+          const canvas = document.createElement("canvas");
+          const maxAncho = 1024; // Ancho máximo para optimizar peso
+          const escala = maxAncho / img.width;
+          
+          if (escala < 1) {
+            canvas.width = maxAncho;
+            canvas.height = img.height * escala;
+          } else {
+            canvas.width = img.width;
+            canvas.height = img.height;
+          }
+          
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          
+          // Convertir a Base64 en formato JPG con calidad comprimida al 70%
+          archivoBase64 = canvas.toDataURL("image/jpeg", 0.7);
+          document.getElementById("labelFoto").textContent = "✓ Foto lista y optimizada";
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
 
   document.getElementById("facturaForm").addEventListener("submit", function(e) {
     e.preventDefault();
@@ -87,7 +144,7 @@
     
     btn.disabled = true;
     estado.style.color = "#0d6efd";
-    estado.textContent = "Enviando datos a Google Sheets...";
+    estado.textContent = "Procesando y enviando datos...";
 
     const datosFactura = {
       tipoOperacion: document.getElementById("tipoOperacion").value,
@@ -97,14 +154,14 @@
       rifTercero: document.getElementById("rif").value,
       montoExento: parseFloat(document.getElementById("montoExento").value) || 0,
       baseImponible: parseFloat(document.getElementById("baseImponible").value) || 0,
-      porcRetencion: parseFloat(document.getElementById("porcRetencion").value) || 0
+      porcRetencion: parseFloat(document.getElementById("porcRetencion").value) || 0,
+      archivoBase64: archivoBase64,
+      nombreArchivo: nombreArchivo,
+      tipoArchivo: tipoArchivo
     };
 
-    // DOCUMENTACIÓN:
-    // Se añade un parámetro 't' con la hora actual para evitar el uso de caché en navegadores móviles
     const urlConAntiCache = URL_BASE + "?t=" + new Date().getTime();
 
-    // DOCUMENTACIÓN: Petición HTTP optimizada para compatibilidad móvil
     fetch(urlConAntiCache, {
       method: "POST",
       mode: "no-cors",
@@ -114,14 +171,16 @@
     })
     .then(() => {
       estado.style.color = "green";
-      estado.textContent = "¡Factura enviada con éxito!";
+      estado.textContent = "¡Factura y foto guardadas con éxito!";
       document.getElementById("facturaForm").reset();
+      document.getElementById("labelFoto").textContent = "📷 Toca aquí para tomar foto o elegir imagen";
+      archivoBase64 = "";
       btn.disabled = false;
     })
     .catch(err => {
-      console.error("Error de envío:", err);
+      console.error("Error al enviar:", err);
       estado.style.color = "red";
-      estado.textContent = "Error de conexión. Intenta nuevamente.";
+      estado.textContent = "Error de conexión al enviar.";
       btn.disabled = false;
     });
   });
@@ -129,3 +188,6 @@
 
 </body>
 </html>
+ 
+
+  
